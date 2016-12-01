@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author shakhawat.hossain
@@ -19,9 +20,10 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
 
     @Override
     public void process(EntityManager em) {
-//        setup(em);
+//        setupEmployeeData(em);
 
         showHqlInjection(em);
+        showNamedQuery(em);
 
         /*
         List<Employee> employeeList = em.createQuery("SELECT e FROM Employee e", Employee.class).getResultList();
@@ -113,6 +115,19 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
 
     }
 
+    private void showNamedQuery(EntityManager em) {
+        setupEmployeeData(em);
+
+        List<Employee> employees = em.createNamedQuery("Employee.findByName", Employee.class)
+                .setParameter("name", "BRIN")
+                .getResultList();
+
+        logger.debug("===================== Fetched Employees using Named Query =============");
+        for (Employee employee : employees) {
+            logger.debug("Employee : {}", employee);
+        }
+    }
+
     private void showHqlInjection(EntityManager em) {
         setupLoginData(em);
 
@@ -145,7 +160,7 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
         logger.debug("Login: {}", login);
     }
 
-    private void setup(EntityManager em) {
+    private void setupEmployeeData(EntityManager em) {
         Department department1 = new Department("ENGINEERING AND TECHNOLOGY");
         Department department2 = new Department("BUSINESS STRATEGY");
 
@@ -173,14 +188,14 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
         employee1.setProjects(new ArrayList<>(Arrays.asList(project1, project2)));
         employee2.setProjects(new ArrayList<>(Arrays.asList(project2)));
 
-        em.merge(employee1);
-        em.merge(employee2);
+        employee1 = em.merge(employee1);
+        employee2 = em.merge(employee2);
 
         em.flush();
 
     }
 
-    public void setupLoginData(EntityManager em) {
+    private void setupLoginData(EntityManager em) {
         Login login = new Login("Isaac Asimov", "asimov", "VerY sTr0NG pAsSW0RD 1NDEED !");
         em.persist(login);
     }
