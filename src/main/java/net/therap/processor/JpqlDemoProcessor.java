@@ -1,30 +1,31 @@
 package net.therap.processor;
 
+import net.therap.command.EmployeeRowCmd;
+import net.therap.command.Status;
 import net.therap.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author shakhawat.hossain
  * @since 11/27/16
  */
-public class JpqlSelectProcessor implements DbCommandProcessor {
+public class JpqlDemoProcessor implements DbCommandProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(JpqlSelectProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(JpqlDemoProcessor.class);
 
     @Override
     public void process(EntityManager em) {
-//        setupEmployeeData(em);
-
         showHqlInjection(em);
-        showNamedQuery(em);
-
+//        showNamedQuery(em);
+//        showConverter(em);
+        showConstructorResultMapping(em);
+        showFetchGraph(em);
         /*
         List<Employee> employeeList = em.createQuery("SELECT e FROM Employee e", Employee.class).getResultList();
 
@@ -113,6 +114,58 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
 //
 //        em.createQuery(hql).getResultList();
 
+
+    }
+
+    private void showFetchGraph(EntityManager em) {
+        setupEmployeeData(em);
+
+        EntityGraph graph = em.getEntityGraph("graph.Employee.projects");
+        Map<String, Object> hints = Collections.<String, Object>singletonMap("javax.persistence.fetchgraph", graph);
+
+        Employee employee = em.find(Employee.class, 1L, hints);
+
+        logger.debug("===================== Fetched Employee : Fetch Graph =============");
+//        logger.debug("Employee: {}", employee);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private void showConstructorResultMapping(EntityManager em) {
+        setupEmployeeData(em);
+
+        String sql = "SELECT DISTINCT e.name AS name, d.name AS departmentName, e.phone_number AS phoneNumber" +
+                " FROM table_employee e" +
+                " JOIN table_department d ON (e.dept_id = d.id)";
+
+        List<EmployeeRowCmd> employeeRowCmds = em.createNativeQuery(sql, "EmployeeRowCmdMapping").getResultList();
+
+        logger.debug("=====================  Constructed EmployeeRowCmd by SqlResultSetMapping  =============");
+        for (EmployeeRowCmd employeeRowCmd : employeeRowCmds) {
+            logger.debug("EmployeeRowCmd : {}", employeeRowCmd);
+        }
+    }
+
+    private void showConverter(EntityManager em) {
+        setupReleaseNoteData(em);
+
+        List<ReleaseNote> releaseNotes = em.createQuery("FROM ReleaseNote rn", ReleaseNote.class)
+                .getResultList();
+
+        logger.debug("===================== Fetched Release Notes (Status converted) =============");
+        for (ReleaseNote releaseNote : releaseNotes) {
+            logger.debug("ReleaseNote : {}", releaseNote);
+        }
+    }
+
+    private void setupReleaseNoteData(EntityManager em) {
+        ReleaseNote releaseNote1 = new ReleaseNote("Release Note 2017.0.0", Status.IN_PREP);
+        ReleaseNote releaseNote2 = new ReleaseNote("Release Note 2016.6.0", Status.SUBMITTED);
+
+        em.persist(releaseNote1);
+        em.persist(releaseNote2);
+
+        em.flush();
     }
 
     private void showNamedQuery(EntityManager em) {
@@ -186,7 +239,7 @@ public class JpqlSelectProcessor implements DbCommandProcessor {
         em.persist(project3);
 
         employee1.setProjects(new ArrayList<>(Arrays.asList(project1, project2)));
-        employee2.setProjects(new ArrayList<>(Arrays.asList(project2)));
+        employee2.setProjects(new ArrayList<>(Collections.singletonList(project2)));
 
         employee1 = em.merge(employee1);
         employee2 = em.merge(employee2);

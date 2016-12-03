@@ -23,6 +23,9 @@ public class Project implements Serializable {
     @Enumerated(value = EnumType.STRING)
     private ProjectType projectType;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private ReleaseNote releaseNote;
+
     public Project() {
     }
 
@@ -53,6 +56,10 @@ public class Project implements Serializable {
 
     public void setProjectType(ProjectType projectType) {
         this.projectType = projectType;
+    }
+
+    public ReleaseNote getReleaseNote() {
+        return releaseNote;
     }
 
     @Override

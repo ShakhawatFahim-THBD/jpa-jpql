@@ -1,5 +1,7 @@
 package net.therap.domain;
 
+import net.therap.command.EmployeeRowCmd;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
@@ -10,6 +12,22 @@ import java.util.List;
  */
 @Entity
 @Table(name = "table_employee")
+@NamedQueries({
+        @NamedQuery(name = "Employee.findAll",
+                query = "SELECT e FROM Employee e"),
+        @NamedQuery(name = "Employee.findByName",
+                query = "SELECT e FROM Employee e WHERE e.name = :name"),
+})
+@SqlResultSetMapping(
+        name = "EmployeeRowCmdMapping",
+        classes = @ConstructorResult(
+                targetClass = EmployeeRowCmd.class,
+                columns = {
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "departmentName", type = String.class),
+                        @ColumnResult(name = "phoneNumber", type = String.class)}))
+@NamedEntityGraph(name = "graph.Employee.projects",
+        attributeNodes = @NamedAttributeNode("projects"))
 public class Employee implements Serializable {
 
     private static final long serialVersionUID = 1L;

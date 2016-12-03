@@ -20,7 +20,7 @@ public class Main {
 
         PersistenceManager manager = new PersistenceManager();
 
-        manager.execute(new JpqlSelectProcessor());
+        manager.execute(new JpqlDemoProcessor());
 
         manager.close();
 
