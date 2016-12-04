@@ -26,8 +26,13 @@ import java.util.List;
                         @ColumnResult(name = "name", type = String.class),
                         @ColumnResult(name = "departmentName", type = String.class),
                         @ColumnResult(name = "phoneNumber", type = String.class)}))
-@NamedEntityGraph(name = "graph.Employee.projects",
-        attributeNodes = @NamedAttributeNode("projects"))
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "graph.Employee.projects",
+                attributeNodes = @NamedAttributeNode("projects")),
+        @NamedEntityGraph(name = "graph.Employee.department",
+                attributeNodes = @NamedAttributeNode("department"))
+})
+
 public class Employee implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -134,8 +139,6 @@ public class Employee implements Serializable {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", address=" + address +
-                ", department=" + department +
-                ", projects=" + projects +
                 ", salary=" + salary +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 '}';

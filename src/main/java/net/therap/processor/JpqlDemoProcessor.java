@@ -21,10 +21,10 @@ public class JpqlDemoProcessor implements DbCommandProcessor {
 
     @Override
     public void process(EntityManager em) {
-        showHqlInjection(em);
+//        showHqlInjection(em);
 //        showNamedQuery(em);
 //        showConverter(em);
-        showConstructorResultMapping(em);
+//        showConstructorResultMapping(em);
         showFetchGraph(em);
         /*
         List<Employee> employeeList = em.createQuery("SELECT e FROM Employee e", Employee.class).getResultList();
@@ -120,13 +120,14 @@ public class JpqlDemoProcessor implements DbCommandProcessor {
     private void showFetchGraph(EntityManager em) {
         setupEmployeeData(em);
 
+//        EntityGraph graph = em.getEntityGraph("graph.Employee.department");
         EntityGraph graph = em.getEntityGraph("graph.Employee.projects");
         Map<String, Object> hints = Collections.<String, Object>singletonMap("javax.persistence.fetchgraph", graph);
 
         Employee employee = em.find(Employee.class, 1L, hints);
 
         logger.debug("===================== Fetched Employee : Fetch Graph =============");
-//        logger.debug("Employee: {}", employee);
+        logger.debug("Employee: {}", employee);
 
     }
 
@@ -238,13 +239,14 @@ public class JpqlDemoProcessor implements DbCommandProcessor {
         em.persist(project2);
         em.persist(project3);
 
-        employee1.setProjects(new ArrayList<>(Arrays.asList(project1, project2)));
+        employee1.setProjects(new ArrayList<>(Arrays.asList(project1, project2, project3)));
         employee2.setProjects(new ArrayList<>(Collections.singletonList(project2)));
 
         employee1 = em.merge(employee1);
         employee2 = em.merge(employee2);
 
         em.flush();
+        em.clear();
 
     }
 
